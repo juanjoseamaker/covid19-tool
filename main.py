@@ -30,7 +30,7 @@ def main():
         print('usage:', sys.argv[0], '[summary|search|help] (country) (date)')
         print('- This program use api.covid19api.com to get the data')
 
-    if sys.argv[1] == 'summary':
+    elif sys.argv[1] == 'summary':
         data = connect_api('/summary')
 
         print('Coronavirus statistics summary')
@@ -41,13 +41,14 @@ def main():
         print('- New Confirmed:', "{:,}".format(data['Global']['NewConfirmed']))
         print('- New Recovered:', "{:,}".format(data['Global']['NewRecovered']))
         print('- New Deaths:', "   {:,}".format(data['Global']['NewDeaths']))
+        print('Statistics date:', data['Date'])
 
     elif sys.argv[1] == 'search' and len(sys.argv) > 2:
         data = connect_api('/summary')
-        query = sys.argv[2]
+        query = sys.argv[2].lower()
 
         for country in data['Countries']:
-            if query.lower() in country['Country'].lower():
+            if query in country['Country'].lower():
                 print('Coronavirus', country['Country'], 'statistics summary')
                 print('- Total Confirmed:', "{:,}".format(country['TotalConfirmed']))
                 print('- Total Recovered:', "{:,}".format(country['TotalRecovered']))
@@ -56,6 +57,7 @@ def main():
                 print('- New Confirmed:', "{:,}".format(country['NewConfirmed']))
                 print('- New Recovered:', "{:,}".format(country['NewRecovered']))
                 print('- New Deaths:', "   {:,}".format(country['NewDeaths']))
+                print('Statistics date:', country['Date'])
 
     else:
         print('usage:', sys.argv[0], '[summary|search|help] (country) (date)')
