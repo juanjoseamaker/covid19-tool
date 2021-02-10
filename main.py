@@ -1,3 +1,7 @@
+#!/usr/bin/python3
+
+# push content to github: git push -u origin main
+
 import http.client
 import json
 import sys
