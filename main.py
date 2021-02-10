@@ -13,7 +13,7 @@ def connect_api(url, method='GET'):
 
     if resp.code != 200:
         print('cannot get data from server, server returned code', resp.code)
-        print(resp.read())
+        print(resp.read().decode())
         sys.exit(1)
 
     data = json.load(resp)
@@ -29,6 +29,7 @@ def main():
     if sys.argv[1] == 'help':
         print('usage:', sys.argv[0], '[summary|search|help] (country) (date)')
         print('- This program use api.covid19api.com to get the data')
+        print('- This program does not take responsibility about the data showed')
 
     elif sys.argv[1] == 'summary':
         data = connect_api('/summary')
@@ -59,8 +60,33 @@ def main():
                 print('- New Deaths:', "   {:,}".format(country['NewDeaths']))
                 print('Statistics date:', country['Date'])
 
+    elif sys.argv[1] == 'top' and len(sys.argv) > 3:
+        top_list = []
+        top_len = int(sys.argv[2])
+        query = sys.argv[3].lower()
+        max_e = 0
+
+        if query == "global":
+            data = connect_api('/summary')
+
+            for _ in range(top_len):
+                for i in range(len(data['Countries'])):
+                    if data['Countries'][i]['TotalConfirmed'] > data['Countries'][max_e]['TotalConfirmed']:
+                        max_e = i
+
+                try:
+                    top_list.append(data['Countries'].pop(max_e))
+                except IndexError:
+                    print('top argument is greater than the number of territories')
+
+                max_e = 0
+
+            print('Global top by confirmed cases')
+            for country in top_list:
+                print('-', "{:,}".format(country['TotalConfirmed']), '\t', country['Country'])
+
     else:
-        print('usage:', sys.argv[0], '[summary|search|help] (country) (date)')
+        print('usage:', sys.argv[0], '[summary|search|help|top] (country) (date)')
 
 if __name__ == '__main__':
     main()
