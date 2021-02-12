@@ -12,7 +12,7 @@ def connect_api(url, method='GET'):
     resp = conn.getresponse()
 
     if resp.code != 200:
-        print('cannot get data from server, server returned code', resp.code)
+        print('cannot get', url, 'data from server, server returned code', resp.code)
         print(resp.read().decode())
         sys.exit(1)
 
@@ -23,11 +23,11 @@ def connect_api(url, method='GET'):
 
 def main():
     if len(sys.argv) < 2:
-        print('usage:', sys.argv[0], '[summary|search|help] (country) (date)')
+        print('usage:', sys.argv[0], '[summary|search|help|top|graph] (country) (arg)')
         sys.exit(0)
 
     if sys.argv[1] == 'help':
-        print('usage:', sys.argv[0], '[summary|search|help] (country) (date)')
+        print('usage:', sys.argv[0], '[summary|search|help|top|graph] (country) (arg)')
         print('- This program use api.covid19api.com to get the data')
         print('- This program does not take responsibility about the data showed')
 
@@ -85,8 +85,25 @@ def main():
             for country in top_list:
                 print('-', "{:,}".format(country['TotalConfirmed']), '\t', country['Country'])
 
+    elif sys.argv[1] == 'graph' and len(sys.argv) > 3:
+        graph_len = int(sys.argv[2])
+        query = sys.argv[3].lower()
+        data = connect_api('/summary')
+
+        for country in data['Countries']:
+            if query in country['Country'].lower():
+                country_data = connect_api('/country/' + country['Slug'])
+
+                print(country['Country'], 'confirmed cases graph')
+                for day in country_data:
+                    bar_len = int(day["Confirmed"]/graph_len)
+                    if bar_len == 0:
+                        continue
+
+                    print(day['Date'], day['Confirmed'], '\t\t', '|'*bar_len)
+
     else:
-        print('usage:', sys.argv[0], '[summary|search|help|top] (country) (date)')
+        print('usage:', sys.argv[0], '[summary|search|help|top|graph] (country) (arg)')
 
 if __name__ == '__main__':
     main()
